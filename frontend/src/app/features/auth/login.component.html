@@ -1,0 +1,234 @@
+<main class="auth-page">
+  <section class="auth-hero">
+    <div class="brand-header">
+      <div class="brand-icon">
+        <i class="pi pi-truck"></i>
+      </div>
+      <div>
+        <h1>TranspoSystem</h1>
+        <p>Gestion Inteligente de Transporte</p>
+      </div>
+    </div>
+
+    <div class="brand-copy">
+      <h2>Bienvenido al futuro del transporte</h2>
+      <p>Administra rutas, flotas, conductores, pasajeros y operaciones desde una sola plataforma.</p>
+    </div>
+  </section>
+
+  <section class="auth-shell">
+    <div class="auth-tabs" role="tablist" aria-label="Autenticacion">
+      <button
+        type="button"
+        role="tab"
+        [class.active]="activeTab === 'login'"
+        (click)="setTab('login')">
+        Iniciar Sesion
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.active]="activeTab === 'register'"
+        (click)="setTab('register')">
+        Registrarse
+      </button>
+      <button
+        type="button"
+        role="tab"
+        *ngIf="pendingPhone"
+        [class.active]="activeTab === 'verify'"
+        (click)="setTab('verify')">
+        Confirmar
+      </button>
+    </div>
+
+    <section class="auth-card" *ngIf="activeTab === 'login'">
+      <div class="form-heading">
+        <h1>Bienvenido de nuevo</h1>
+        <p>Ingresa tus credenciales para acceder al sistema</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="submitLogin()" class="auth-form">
+        <div class="field-group">
+          <label for="login-phone">Telefono</label>
+          <span class="input-wrap">
+            <i class="pi pi-phone"></i>
+            <input
+              id="login-phone"
+              pInputText
+              type="tel"
+              formControlName="telefono"
+              autocomplete="tel"
+              placeholder="+591 70000000">
+          </span>
+          <small class="field-error" *ngIf="loginHasError('telefono')">Ingresa un telefono valido.</small>
+        </div>
+
+        <div class="field-group">
+          <label for="login-password">Contrasena</label>
+          <p-password
+            inputId="login-password"
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            autocomplete="current-password"
+            styleClass="password-wrap"
+            inputStyleClass="password-input"
+            placeholder="********">
+          </p-password>
+          <small class="field-error" *ngIf="loginHasError('password')">Minimo 8 caracteres.</small>
+        </div>
+
+        <div class="split-row">
+          <span class="remember-row">
+            <p-checkbox inputId="remember" formControlName="remember" [binary]="true"></p-checkbox>
+            <label for="remember">Recordarme</label>
+          </span>
+          <button type="button" class="text-link">Olvidaste tu contrasena?</button>
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          class="primary-action"
+          label="Iniciar Sesion"
+          [loading]="loading"
+          [disabled]="loginForm.invalid || loading">
+        </button>
+      </form>
+    </section>
+
+    <section class="auth-card register-card" *ngIf="activeTab === 'register'">
+      <div class="form-heading">
+        <h1>Crear una cuenta</h1>
+        <p>Crea tu cuenta con tu numero de WhatsApp</p>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="submitRegister()" class="auth-form">
+        <div class="two-columns">
+          <div class="field-group">
+            <label for="first-name">Nombre</label>
+            <span class="input-wrap">
+              <i class="pi pi-user"></i>
+              <input id="first-name" pInputText type="text" formControlName="firstName" autocomplete="given-name" placeholder="Carlos">
+            </span>
+            <small class="field-error" *ngIf="registerHasError('firstName')">Nombre obligatorio.</small>
+          </div>
+
+          <div class="field-group">
+            <label for="last-name">Apellido</label>
+            <span class="input-wrap">
+              <i class="pi pi-user"></i>
+              <input id="last-name" pInputText type="text" formControlName="lastName" autocomplete="family-name" placeholder="Rodriguez">
+            </span>
+            <small class="field-error" *ngIf="registerHasError('lastName')">Apellido obligatorio.</small>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="company">Empresa de Transporte</label>
+          <span class="input-wrap">
+            <i class="pi pi-building"></i>
+            <input id="company" pInputText type="text" formControlName="company" placeholder="Transportes Rodriguez">
+          </span>
+          <small class="field-error" *ngIf="registerHasError('company')">Empresa obligatoria.</small>
+        </div>
+
+        <div class="field-group">
+          <label for="phone">Telefono de Contacto / WhatsApp</label>
+          <span class="input-wrap">
+            <i class="pi pi-phone"></i>
+            <input id="phone" pInputText type="tel" formControlName="phone" autocomplete="tel" placeholder="+591 70000000">
+          </span>
+          <small class="field-error" *ngIf="registerHasError('phone')">Ingresa un telefono valido.</small>
+        </div>
+
+        <div class="field-group">
+          <label for="register-password">Contrasena</label>
+          <p-password
+            inputId="register-password"
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            autocomplete="new-password"
+            styleClass="password-wrap"
+            inputStyleClass="password-input"
+            placeholder="********">
+          </p-password>
+        </div>
+
+        <div class="field-group">
+          <label for="confirm-password">Confirmar Contrasena</label>
+          <p-password
+            inputId="confirm-password"
+            formControlName="confirmPassword"
+            [toggleMask]="true"
+            [feedback]="false"
+            autocomplete="new-password"
+            styleClass="password-wrap"
+            inputStyleClass="password-input"
+            placeholder="********">
+          </p-password>
+          <small class="field-error" *ngIf="registerForm.hasError('passwordsMismatch') && registerForm.controls.confirmPassword.touched">
+            Las contrasenas no coinciden.
+          </small>
+        </div>
+
+       
+        <button
+          pButton
+          type="submit"
+          class="primary-action"
+          label="Crear Cuenta"
+          [loading]="loading"
+          [disabled]="registerForm.invalid || loading">
+        </button>
+
+        <p class="switch-copy">
+          Ya tienes una cuenta?
+          <button type="button" (click)="setTab('login')">Inicia sesion aqui</button>
+        </p>
+      </form>
+    </section>
+
+    <section class="auth-card" *ngIf="activeTab === 'verify'">
+      <div class="form-heading">
+        <h1>Confirma tu cuenta</h1>
+        <p>Ingresa el codigo enviado a tu WhatsApp</p>
+      </div>
+
+      <form [formGroup]="verifyForm" (ngSubmit)="submitVerification()" class="auth-form">
+        <div class="field-group">
+          <label for="verification-code">Codigo de confirmacion</label>
+          <span class="input-wrap">
+            <i class="pi pi-key"></i>
+            <input
+              id="verification-code"
+              pInputText
+              type="text"
+              inputmode="numeric"
+              formControlName="code"
+              autocomplete="one-time-code"
+              placeholder="123456">
+          </span>
+          <small class="field-error" *ngIf="verifyHasError('code')">Ingresa el codigo de 6 digitos.</small>
+          <small class="field-error" *ngIf="devCode">Codigo dev: {{ devCode }}</small>
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          class="primary-action"
+          label="Verificar cuenta"
+          [loading]="loading"
+          [disabled]="verifyForm.invalid || loading">
+        </button>
+
+        <p class="switch-copy">
+          No recibiste el codigo?
+          <button type="button" (click)="resendCode()">Reenviar codigo</button>
+        </p>
+      </form>
+    </section>
+  </section>
+</main>

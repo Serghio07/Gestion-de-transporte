@@ -1,0 +1,276 @@
+@host = localhost:3000
+@base = http://{{host}}/api
+
+### Variables
+@contentType = application/json
+
+### ===== AUTENTICACIÓN =====
+
+### Login Admin
+POST {{base}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "nombre": "admin",
+  "password": "Admin123!@#"
+}
+
+### Login Trabajador
+POST {{base}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "nombre": "juan_perez",
+  "password": "Juan123!@#"
+}
+
+### Refresh Token
+@refreshToken = tu_refresh_token_aqui
+POST {{base}}/auth/refresh-token
+Content-Type: {{contentType}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Logout
+@accessToken = tu_access_token_aqui
+POST {{base}}/auth/logout
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+### Get Profile
+GET {{base}}/auth/profile
+Authorization: Bearer {{accessToken}}
+
+### Verify Token
+GET {{base}}/auth/verify
+Authorization: Bearer {{accessToken}}
+
+### Change Password
+POST {{base}}/auth/change-password
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "passwordActual": "Admin123!@#",
+  "passwordNueva": "NewAdmin123!@#",
+  "passwordConfirm": "NewAdmin123!@#"
+}
+
+### ===== USUARIOS =====
+
+### Get All Users (Admin only)
+GET {{base}}/usuarios?page=1&limit=10
+Authorization: Bearer {{accessToken}}
+
+### Get User by ID
+GET {{base}}/usuarios/1
+Authorization: Bearer {{accessToken}}
+
+### Create User (Admin only)
+POST {{base}}/usuarios
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "nombre": "nuevo_usuario",
+  "rol_id": 2,
+  "password": "NewUser123!@#",
+  "pin_acceso": "111111"
+}
+
+### Update User
+PUT {{base}}/usuarios/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "rol_id": 3
+}
+
+### Deactivate User
+PATCH {{base}}/usuarios/2/deactivate
+Authorization: Bearer {{accessToken}}
+
+### Delete User (Admin only)
+DELETE {{base}}/usuarios/2
+Authorization: Bearer {{accessToken}}
+
+### ===== VEHÍCULOS =====
+
+### Get All Vehicles
+GET {{base}}/vehiculos?page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Get Vehicle by ID
+GET {{base}}/vehiculos/1
+Authorization: Bearer {{accessToken}}
+
+### Create Vehicle (Admin/Supervisor)
+POST {{base}}/vehiculos
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "unidad_nro": "VOL-005",
+  "tipo": "Volqueta",
+  "placa_serie": "MNO-7890",
+  "marca": "Hino",
+  "modelo": "500",
+  "anio": 2023,
+  "horometro_acumulado": 2000
+}
+
+### Update Vehicle
+PUT {{base}}/vehiculos/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "horometro_acumulado": 5500
+}
+
+### Delete Vehicle (Admin only)
+DELETE {{base}}/vehiculos/1
+Authorization: Bearer {{accessToken}}
+
+### ===== JORNADAS =====
+
+### Get All Journeys
+GET {{base}}/jornadas?page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Get Journey by ID
+GET {{base}}/jornadas/1
+Authorization: Bearer {{accessToken}}
+
+### Create Journey
+POST {{base}}/jornadas
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "usuario_id": 1,
+  "vehiculo_id": 1,
+  "capital_recibido": 50000,
+  "viaticos_entregados": 10000,
+  "diesel_inicial_nivel": "3/4",
+  "ubicacion_gps_inicio": "10.3923,-75.4821"
+}
+
+### Close Journey
+PUT {{base}}/jornadas/1/cerrar
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "diesel_final_nivel": "1/4",
+  "ubicacion_gps_final": "10.3800,-75.4850",
+  "horometro_acumulado_final": 1500,
+  "observaciones": "Jornada completada sin incidentes"
+}
+
+### Get User Journeys
+GET {{base}}/usuarios/1/jornadas
+Authorization: Bearer {{accessToken}}
+
+### ===== ACTIVIDADES/GASTOS =====
+
+### Get All Activities
+GET {{base}}/actividades?page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Create Activity
+POST {{base}}/actividades
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "jornada_id": 1,
+  "tipo_actividad": "Compra Arena",
+  "monto_gastado": 150000,
+  "cantidad_m3_galones": 5.5,
+  "proveedor_lugar": "Arenera San Miguel",
+  "destino_proyecto": "Obra Centro Comercial"
+}
+
+### Get Journey Activities
+GET {{base}}/jornadas/1/actividades
+Authorization: Bearer {{accessToken}}
+
+### Update Activity
+PUT {{base}}/actividades/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "monto_gastado": 160000
+}
+
+### ===== MANTENIMIENTO =====
+
+### Get All Maintenance
+GET {{base}}/mantenimientos?page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Create Maintenance (Admin/Supervisor)
+POST {{base}}/mantenimientos
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "vehiculo_id": 1,
+  "fecha_servicio": "2024-01-17",
+  "tipo_servicio": "Cambio de Aceite",
+  "horometro_servicio": 5000,
+  "proximo_mantenimiento_h": 5500,
+  "costo_total": 80000
+}
+
+### Get Vehicle Maintenance
+GET {{base}}/vehiculos/1/mantenimientos
+Authorization: Bearer {{accessToken}}
+
+### ===== AVERÍAS =====
+
+### Get All Failures
+GET {{base}}/averias?page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Report Failure
+POST {{base}}/averias
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "jornada_id": 1,
+  "vehiculo_id": 1,
+  "descripcion_falla": "El motor no prende",
+  "tipo_averia": "Motor",
+  "gravedad": "Alta",
+  "ubicacion_falla": "Obra Centro Comercial"
+}
+
+### Get Journey Failures
+GET {{base}}/jornadas/1/averias
+Authorization: Bearer {{accessToken}}
+
+### Update Failure
+PUT {{base}}/averias/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "reparado": true,
+  "costo_reparacion": 500000,
+  "observaciones_reparacion": "Se cambió el motor"
+}
+
+### ===== SALUD DEL SERVIDOR =====
+
+### Health Check
+GET http://{{host}}/health
+
+### Root Info
+GET http://{{host}}/
