@@ -81,13 +81,13 @@ class UpdateUsuarioUseCase {
 
     if (updateUsuarioDTO.password) {
       updateUsuarioDTO.password_hash = await bcrypt.hash(updateUsuarioDTO.password, 10);
-      delete updateUsuarioDTO.password;
     }
+    delete updateUsuarioDTO.password;
 
     if (updateUsuarioDTO.estado !== null && updateUsuarioDTO.estado !== undefined) {
       updateUsuarioDTO.activo = updateUsuarioDTO.estado === 'activo';
-      delete updateUsuarioDTO.estado;
     }
+    delete updateUsuarioDTO.estado;
 
     const updated = await this.usuarioRepository.update(id, updateUsuarioDTO);
     return updated;

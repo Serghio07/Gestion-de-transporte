@@ -6,7 +6,7 @@ module.exports = (sequelize) => {
     nombre: { type: DataTypes.STRING(100), allowNull: false },
     apellido: { type: DataTypes.STRING(100), allowNull: true },
     empresa_transporte: { type: DataTypes.STRING(150), allowNull: true },
-    foto_url: { type: DataTypes.STRING(500), allowNull: true },
+    foto_url: { type: DataTypes.TEXT, allowNull: true },
     password_hash: { type: DataTypes.STRING(255), allowNull: false },
     pin_acceso: { type: DataTypes.STRING(10), allowNull: true },
     email: { type: DataTypes.STRING(100), allowNull: true, unique: true },

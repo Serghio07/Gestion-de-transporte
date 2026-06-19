@@ -1,16 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
@@ -23,14 +21,13 @@ import { UsuariosService, Usuario } from '../usuarios/usuarios.service';
   standalone: true,
   imports: [
     ButtonModule,
-    CheckboxModule,
     CommonModule,
     ConfirmDialogModule,
     DialogModule,
     FormsModule,
+    InputSwitchModule,
     InputTextModule,
     PaginatorModule,
-    ProgressSpinnerModule,
     ReactiveFormsModule,
     TableModule,
     TagModule
@@ -40,6 +37,8 @@ import { UsuariosService, Usuario } from '../usuarios/usuarios.service';
   styleUrl: './vehiculos.component.scss'
 })
 export class VehiculosComponent implements OnInit {
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
+
   private readonly fb = inject(FormBuilder);
   private readonly vehiculosService = inject(VehiculosService);
   private readonly usuariosService = inject(UsuariosService);
@@ -78,31 +77,50 @@ export class VehiculosComponent implements OnInit {
     this.loadUsuarios();
   }
 
+  get activeCount(): number {
+    return this.vehiculos.filter((v) => v.activo).length;
+  }
+
   loadUsuarios(): void {
     this.usuariosService.list(1, 100).subscribe({
       next: (response) => {
         this.usuarios = response.data;
       },
-      error: (error) => {
-        console.error('No se pudieron cargar los trabajadores', error);
+      error: () => {
+        this.messages.add({ severity: 'warn', summary: 'Trabajadores', detail: 'No se pudieron cargar los conductores.' });
       }
     });
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.form.patchValue({ foto_url: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.messages.add({ severity: 'warn', summary: 'Archivo no válido', detail: 'Selecciona una imagen JPG o PNG.' });
+      input.value = '';
+      return;
     }
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.messages.add({ severity: 'warn', summary: 'Imagen muy grande', detail: 'El tamaño máximo recomendado es 2 MB.' });
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.form.patchValue({ foto_url: reader.result as string });
+    };
+    reader.readAsDataURL(file);
   }
 
   clearFoto(): void {
     this.form.patchValue({ foto_url: '' });
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 
   load(): void {
@@ -172,15 +190,23 @@ export class VehiculosComponent implements OnInit {
       modelo: vehiculo.modelo ?? '',
       foto_url: vehiculo.foto_url ?? '',
       uso_total_horas: vehiculo.uso_total_horas ?? '0 hours',
-      activo: vehiculo.activo,
-      conductor_id: vehiculo.conductor_id
+      activo: vehiculo.activo ?? true,
+      conductor_id: vehiculo.conductor_id ?? null
     });
     this.dialogVisible = true;
+  }
+
+  closeDialog(): void {
+    this.dialogVisible = false;
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.messages.add({ severity: 'warn', summary: 'Revisa el formulario', detail: 'Completa los campos obligatorios.' });
       return;
     }
 
@@ -196,7 +222,9 @@ export class VehiculosComponent implements OnInit {
       conductor_id: raw.conductor_id
     };
 
-    if (this.editing) payload.uso_total_horas = raw.uso_total_horas.trim() || '0 hours';
+    if (this.editing) {
+      payload.uso_total_horas = raw.uso_total_horas.trim() || '0 hours';
+    }
 
     this.saving = true;
     const request = this.editing
@@ -206,7 +234,7 @@ export class VehiculosComponent implements OnInit {
     request.subscribe({
       next: () => {
         this.saving = false;
-        this.dialogVisible = false;
+        this.closeDialog();
         this.messages.add({
           severity: 'success',
           summary: this.editing ? 'Vehículo actualizado' : 'Vehículo registrado',
@@ -231,6 +259,18 @@ export class VehiculosComponent implements OnInit {
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => this.delete(vehiculo)
     });
+  }
+
+  conductorName(vehiculo: Vehiculo): string {
+    if (vehiculo.conductor) {
+      return `${vehiculo.conductor.nombre} ${vehiculo.conductor.apellido ?? ''}`.trim();
+    }
+    return 'Sin asignar';
+  }
+
+  hasError(controlName: 'unidad_nro' | 'tipo'): boolean {
+    const control = this.form.controls[controlName];
+    return control.invalid && (control.dirty || control.touched);
   }
 
   private delete(vehiculo: Vehiculo): void {

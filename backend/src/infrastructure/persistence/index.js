@@ -106,6 +106,7 @@ TokenBlacklist.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
     await sequelize.query(`
       ALTER TABLE vehiculos ALTER COLUMN foto_url TYPE TEXT;
       ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS conductor_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL;
+      ALTER TABLE usuarios ALTER COLUMN foto_url TYPE TEXT;
     `);
     console.log('✓ Database schema updated successfully (foto_url to TEXT, conductor_id added)');
   } catch (err) {
