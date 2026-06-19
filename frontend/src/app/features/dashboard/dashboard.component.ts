@@ -1,64 +1,51 @@
 import { Component, inject } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { TagModule } from 'primeng/tag';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ButtonModule, CardModule, TagModule],
+  imports: [RouterLink],
   template: `
-    <main class="dashboard-page">
-      <p-card>
-        <div class="dashboard-header">
-          <div>
-            <p-tag value="Sesion activa" severity="success"></p-tag>
-            <h1>Bienvenido, {{ auth.user()?.name }}</h1>
-            <p>El login con JWT ya esta conectado al backend.</p>
-          </div>
-          <button pButton type="button" icon="pi pi-sign-out" label="Salir" severity="secondary" (click)="auth.logout()"></button>
-        </div>
-      </p-card>
-    </main>
+    <section class="dashboard">
+      <div class="welcome">
+        <span class="eyebrow">Resumen general</span>
+        <h1>Bienvenido, {{ auth.user()?.name }}</h1>
+        <p>Gestiona la operación de {{ auth.user()?.empresa || 'tu empresa' }} desde un solo lugar.</p>
+      </div>
+
+      <div class="module-grid">
+        <a routerLink="/vehiculos" class="module-card">
+          <span class="module-icon"><i class="pi pi-truck"></i></span>
+          <span class="module-copy"><strong>Vehículos</strong><small>Consulta la flota y registra nuevas unidades</small></span>
+          <i class="pi pi-arrow-right"></i>
+        </a>
+        <article class="module-card disabled">
+          <span class="module-icon"><i class="pi pi-calendar"></i></span>
+          <span class="module-copy"><strong>Jornadas</strong><small>Próximamente</small></span>
+        </article>
+        <article class="module-card disabled">
+          <span class="module-icon"><i class="pi pi-wrench"></i></span>
+          <span class="module-copy"><strong>Mantenimientos</strong><small>Próximamente</small></span>
+        </article>
+      </div>
+    </section>
   `,
   styles: [`
-    .dashboard-page {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: var(--surface-ground);
-    }
-
-    p-card {
-      width: min(760px, 100%);
-    }
-
-    .dashboard-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-    }
-
-    h1 {
-      margin: 16px 0 8px;
-      font-size: 1.65rem;
-    }
-
-    p {
-      margin: 0;
-      color: var(--app-muted);
-    }
-
-    @media (max-width: 640px) {
-      .dashboard-header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-    }
+    .dashboard { max-width: 1200px; margin: 0 auto; }
+    .welcome { padding: 30px; border: 1px solid #dbe4f0; border-radius: 16px; background: linear-gradient(135deg, #fff 0%, #eef4ff 100%); }
+    .eyebrow { color: #2563eb; font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 10px 0 8px; font-size: 2rem; }
+    p { margin: 0; color: var(--app-muted); }
+    .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 22px; }
+    .module-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 20px; border: 1px solid #e2e7ef; border-radius: 14px; background: #fff; color: inherit; text-decoration: none; transition: border-color .2s, transform .2s; }
+    a.module-card:hover { border-color: #2563eb; transform: translateY(-2px); }
+    .module-card.disabled { color: #98a2b3; }
+    .module-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: #e8efff; color: #2563eb; font-size: 1.1rem; }
+    .disabled .module-icon { background: #f2f4f7; color: #98a2b3; }
+    .module-copy { display: grid; gap: 4px; }
+    .module-copy small { color: var(--app-muted); }
   `]
 })
 export class DashboardComponent {

@@ -1,4 +1,5 @@
 // Infrastructure - Repository implementations
+const { Op } = require('sequelize');
 
 class UsuarioRepository {
   constructor(sequelizeModel) {
@@ -17,14 +18,22 @@ class UsuarioRepository {
     return this.model.findOne({ where: { telefono } });
   }
 
-  async findAll(options = {}) {
-    const { page = 1, limit = 10, sort = 'id', order = 'ASC' } = options;
+  async findAll(filters = {}, pagination = {}) {
+    const { page = 1, limit = 10, sort = 'id', order = 'ASC' } = pagination;
     const offset = (page - 1) * limit;
+    const where = {};
+    if (filters.empresa_id) where.empresa_id = filters.empresa_id;
+    if (filters.rol_id) where.rol_id = filters.rol_id;
 
     const { count, rows } = await this.model.findAndCountAll({
+      where,
       limit,
       offset,
-      order: [[sort, order]]
+      order: [[sort, order]],
+      include: [
+        { model: this.model.sequelize.models.Role, as: 'role', attributes: ['id', 'nombre'] },
+        { model: this.model.sequelize.models.Empresa, as: 'empresa', attributes: ['id', 'nombre'] }
+      ]
     });
 
     return {
@@ -58,23 +67,41 @@ class VehiculoRepository {
   }
 
   async findById(id) {
-    return this.model.findByPk(id);
+    return this.model.findByPk(id, {
+      include: [
+        { model: this.model.sequelize.models.Usuario, as: 'conductor', attributes: ['id', 'nombre', 'apellido'] }
+      ]
+    });
   }
 
   async findByPlaca(placa) {
     return this.model.findOne({ where: { placa } });
   }
 
-  async findAll(options = {}) {
-    const { page = 1, limit = 10, activo, sort = 'id', order = 'ASC' } = options;
+  async findByUnidadNro(unidad_nro) {
+    return this.model.findOne({ where: { unidad_nro } });
+  }
+
+  async findAll(filters = {}, pagination = {}) {
+    const { page = 1, limit = 10, sort = 'id', order = 'ASC' } = pagination;
     const offset = (page - 1) * limit;
-    const where = activo !== undefined ? { activo } : {};
+    const where = {};
+
+    if (filters.tipo) where.tipo = filters.tipo;
+    if (filters.unidad_nro) {
+      where.unidad_nro = { [Op.iLike]: `%${filters.unidad_nro}%` };
+    }
+    if (filters.activo !== undefined) where.activo = filters.activo === true || filters.activo === 'true';
+    if (filters.empresa_id) where.empresa_id = filters.empresa_id;
 
     const { count, rows } = await this.model.findAndCountAll({
       where,
       limit,
       offset,
-      order: [[sort, order]]
+      order: [[sort, order]],
+      include: [
+        { model: this.model.sequelize.models.Usuario, as: 'conductor', attributes: ['id', 'nombre', 'apellido'] }
+      ]
     });
 
     return {

@@ -18,7 +18,8 @@
     "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
     "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\"",
     "db:seed": "node scripts/seed.js",
-    "db:reset": "node scripts/reset.js"
+    "db:reset": "node scripts/reset.js",
+    "db:migrate:company-images": "node scripts/migrate-company-images.js"
   },
   "keywords": [
     "nodejs",

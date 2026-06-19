@@ -48,13 +48,17 @@ class UsuarioRepositoryImpl extends UsuarioRepository {
     if (filters.nombre) where.nombre = { [this.db.Sequelize.Op.iLike]: `%${filters.nombre}%` };
     if (filters.rol_id) where.rol_id = filters.rol_id;
     if (filters.estado) where.estado = filters.estado;
+    if (filters.empresa_id) where.empresa_id = filters.empresa_id;
 
     const { count, rows } = await this.db.models.Usuario.findAndCountAll({
       where,
       offset,
       limit: pagination.limit,
       order: [['creado_en', 'DESC']],
-      include: [{ model: this.db.models.Role, as: 'role', attributes: ['id', 'nombre'] }]
+      include: [
+        { model: this.db.models.Role, as: 'role', attributes: ['id', 'nombre'] },
+        { model: this.db.models.Empresa, as: 'empresa', attributes: ['id', 'nombre'] }
+      ]
     });
 
     return {

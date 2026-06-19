@@ -20,6 +20,12 @@ class UsuarioController {
 
   async create(req, res, next) {
     try {
+      if (!req.body.empresa_id && req.user?.id) {
+        const { Usuario } = require('../../../infrastructure/persistence');
+        const creador = await Usuario.findByPk(req.user.id);
+        req.body.empresa_id = creador?.empresa_id || null;
+        req.body.empresa_transporte = creador?.empresa_transporte || null;
+      }
       const resultado = await this.createUsuarioUseCase.execute(req.body);
       res.status(201).json(
         formatResponse(true, 'Usuario created successfully', sanitizeUsuario(resultado))
@@ -32,9 +38,12 @@ class UsuarioController {
   async getAll(req, res, next) {
     try {
       const { page = 1, limit = 10 } = req.query;
-      const resultado = await this.getUsuariosUseCase.execute({ 
-        page: parseInt(page), 
-        limit: parseInt(limit) 
+      const { Usuario } = require('../../../infrastructure/persistence');
+      const solicitante = await Usuario.findByPk(req.user.id);
+      const filters = solicitante?.empresa_id ? { empresa_id: solicitante.empresa_id } : {};
+      const resultado = await this.getUsuariosUseCase.execute(filters, {
+        page: parseInt(page),
+        limit: parseInt(limit)
       });
       res.json(
         formatResponse(

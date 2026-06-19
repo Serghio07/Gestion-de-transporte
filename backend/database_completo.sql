@@ -57,12 +57,28 @@ CREATE TABLE IF NOT EXISTS roles (
     actualizado_en  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS empresas (
+    id              SERIAL PRIMARY KEY,
+    nombre          VARCHAR(150) NOT NULL UNIQUE,
+    telefono        VARCHAR(30),
+    activo          BOOLEAN NOT NULL DEFAULT true,
+    creado_por_id   INTEGER,
+    creado_en       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS usuarios (
     id                    SERIAL PRIMARY KEY,
     nombre                VARCHAR(100) NOT NULL UNIQUE,
     password_hash         VARCHAR(255) NOT NULL,
     pin_acceso            VARCHAR(10),
     email                 VARCHAR(100) UNIQUE,
+    foto_url              VARCHAR(500),
+    apellido              VARCHAR(100),
+    empresa_transporte    VARCHAR(150),
+    telefono              VARCHAR(30) UNIQUE,
+    telefono_verificado_en TIMESTAMP,
+    empresa_id            INTEGER REFERENCES empresas(id) ON DELETE SET NULL,
     rol_id                INTEGER NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
     activo                BOOLEAN NOT NULL DEFAULT true,
 
@@ -112,6 +128,7 @@ CREATE TABLE IF NOT EXISTS sesiones_activas (
 
 CREATE TABLE IF NOT EXISTS vehiculos (
     id                  SERIAL PRIMARY KEY,
+    empresa_id          INTEGER REFERENCES empresas(id) ON DELETE SET NULL,
     unidad_nro          VARCHAR(50) NOT NULL UNIQUE,
     tipo                VARCHAR(50) NOT NULL,
     placa_serie         VARCHAR(50) UNIQUE,
@@ -119,6 +136,8 @@ CREATE TABLE IF NOT EXISTS vehiculos (
     modelo              VARCHAR(100),
     anio                SMALLINT,
     color               VARCHAR(50),
+    foto_url            TEXT,
+    conductor_id        INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
     uso_total_horas     INTERVAL NOT NULL DEFAULT INTERVAL '0 hours',
     activo              BOOLEAN NOT NULL DEFAULT true,
     creado_en           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

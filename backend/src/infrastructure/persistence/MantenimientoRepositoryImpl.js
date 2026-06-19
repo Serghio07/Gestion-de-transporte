@@ -39,9 +39,12 @@ class MantenimientoRepositoryImpl extends MantenimientoRepository {
     if (filters.tipo_servicio) where.tipo_servicio = filters.tipo_servicio;
     if (filters.tipo_mantenimiento) where.tipo_servicio = filters.tipo_mantenimiento;
 
+    const vehicleInclude = { model: this.db.models.Vehiculo, as: 'vehiculo' };
+    if (filters.empresa_id) vehicleInclude.where = { empresa_id: filters.empresa_id };
+
     const { count, rows } = await this.db.models.MantenimientoVidaUtil.findAndCountAll({
       where,
-      include: [{ model: this.db.models.Vehiculo, as: 'vehiculo' }],
+      include: [vehicleInclude],
       offset,
       limit: pagination.limit,
       order: [['fecha_servicio', 'DESC']]

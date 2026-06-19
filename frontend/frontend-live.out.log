@@ -1,0 +1,50 @@
+
+> st-frontend@0.1.0 start
+> ng serve --proxy-config proxy.conf.json
+
+Initial chunk files | Names                    |  Raw size
+styles.css          | styles                   | 654.73 kB | 
+polyfills.js        | polyfills                |  88.09 kB | 
+main.js             | main                     |   3.52 kB | 
+chunk-MM4V5LND.js   | -                        |   2.94 kB | 
+
+                    | Initial total            | 749.28 kB
+
+Lazy chunk files    | Names                    |  Raw size
+chunk-SG7SYZ7E.js   | login-component          |  33.90 kB | 
+chunk-AU4TS6D5.js   | vehiculos-component      |  33.06 kB | 
+chunk-GWXKEE3J.js   | mantenimientos-component |  23.85 kB | 
+chunk-ACIYPQIY.js   | usuarios-component       |  20.61 kB | 
+chunk-5O5VTBFE.js   | app-layout-component     |  15.20 kB | 
+chunk-33LNOBKN.js   | dashboard-component      |   5.38 kB | 
+
+Application bundle generation complete. [9.171 seconds]
+
+Watch mode enabled. Watching for file changes...
+  ➜  Local:   http://localhost:4200/
+Initial chunk files | Names           | Raw size
+main.js             | main            |  3.52 kB | 
+
+Lazy chunk files    | Names           | Raw size
+chunk-5SMWBQMQ.js   | login-component | 34.16 kB | 
+
+Application bundle generation complete. [1.342 seconds]
+
+Page reload sent to client(s).
+
+No output file changes.
+
+Application bundle generation complete. [0.199 seconds]
+
+Initial chunk files | Names                | Raw size
+main.js             | main                 |  4.27 kB | 
+chunk-36G76H6R.js   | -                    |  3.23 kB | 
+
+Lazy chunk files    | Names                | Raw size
+chunk-KWC4T3JQ.js   | login-component      | 34.16 kB | 
+chunk-QA7GUMPG.js   | app-layout-component | 15.20 kB | 
+chunk-NMAQBRC7.js   | dashboard-component  |  5.38 kB | 
+
+Application bundle generation complete. [0.644 seconds]
+
+Page reload sent to client(s).

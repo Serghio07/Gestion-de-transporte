@@ -1,0 +1,136 @@
+<main class="fleet-page">
+  <header class="page-heading">
+    <div>
+      <span class="eyebrow">Módulo de flota</span>
+      <h1>Mis vehículos</h1>
+      <p>Consulta las unidades registradas y agrega vehículos para tus jornadas y mantenimientos.</p>
+    </div>
+    <button pButton type="button" icon="pi pi-plus" label="Registrar vehículo" (click)="openCreate()"></button>
+  </header>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon"><i class="pi pi-truck"></i></span>
+      <div><strong>{{ total }}</strong><span>Vehículos registrados</span></div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon active"><i class="pi pi-check-circle"></i></span>
+      <div><strong>{{ vehiculos.length }}</strong><span>Mostrados en esta página</span></div>
+    </article>
+  </section>
+
+  <section class="content-card">
+    <div class="filters">
+      <label>
+        <span>Buscar unidad</span>
+        <div class="search-input">
+          <i class="pi pi-search"></i>
+          <input pInputText [(ngModel)]="searchUnit" placeholder="Ej. VOL-01" (keyup.enter)="applyFilters()" />
+        </div>
+      </label>
+      <label>
+        <span>Tipo exacto</span>
+        <input pInputText [(ngModel)]="filterType" placeholder="Ej. volqueta" (keyup.enter)="applyFilters()" />
+      </label>
+      <label>
+        <span>Estado</span>
+        <select [(ngModel)]="filterStatus">
+          <option value="">Todos</option>
+          <option value="true">Activo</option>
+          <option value="false">Inactivo</option>
+        </select>
+      </label>
+      <div class="filter-actions">
+        <button pButton type="button" icon="pi pi-filter" label="Filtrar" (click)="applyFilters()"></button>
+        <button pButton type="button" icon="pi pi-times" label="Limpiar" severity="secondary" [text]="true" (click)="clearFilters()"></button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <p-table [value]="vehiculos" [loading]="loading" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Imagen</th><th>Unidad</th><th>Tipo</th><th>Placa / serie</th><th>Marca y modelo</th><th>Trabajador</th><th>Horas de uso</th><th>Estado</th><th class="actions-column">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-vehiculo>
+          <tr>
+            <td><img *ngIf="vehiculo.foto_url; else vehicleIcon" class="vehicle-thumb" [src]="vehiculo.foto_url" alt="Imagen del vehículo" /><ng-template #vehicleIcon><span class="vehicle-placeholder"><i class="pi pi-truck"></i></span></ng-template></td>
+            <td><strong>{{ vehiculo.unidad_nro }}</strong></td>
+            <td class="capitalize">{{ vehiculo.tipo }}</td>
+            <td>{{ vehiculo.placa_serie || 'Sin placa' }}</td>
+            <td>{{ vehiculo.marca || 'Sin marca' }} {{ vehiculo.modelo || '' }}</td>
+            <td>
+              <span *ngIf="vehiculo.conductor; else noConductor">
+                <strong>{{ vehiculo.conductor.nombre }}</strong> {{ vehiculo.conductor.apellido || '' }}
+              </span>
+              <ng-template #noConductor><span style="color: #8491a3; font-style: italic;">Sin asignar</span></ng-template>
+            </td>
+            <td>{{ vehiculo.uso_total_horas || '0 hours' }}</td>
+            <td><p-tag [value]="vehiculo.activo ? 'Activo' : 'Inactivo'" [severity]="vehiculo.activo ? 'success' : 'secondary'"></p-tag></td>
+            <td class="row-actions">
+              <button pButton type="button" icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true" aria-label="Editar vehículo" (click)="openEdit(vehiculo)"></button>
+              <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" aria-label="Eliminar vehículo" (click)="confirmDelete(vehiculo)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="9"><div class="empty-state"><i class="pi pi-truck"></i><strong>No hay vehículos para mostrar</strong><span>Registra una unidad nueva o cambia los filtros.</span></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <p-paginator [first]="(page - 1) * pageSize" [rows]="pageSize" [totalRecords]="total"
+      [rowsPerPageOptions]="pageSizeOptions" (onPageChange)="paginate($event)"></p-paginator>
+  </section>
+</main>
+
+<p-dialog [(visible)]="dialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: 'min(620px, 94vw)' }" [header]="editing ? 'Editar vehículo' : 'Registrar vehículo'">
+  <form [formGroup]="form" class="vehicle-form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <label><span>Número de unidad *</span><input pInputText formControlName="unidad_nro" placeholder="VOL-01" /><small *ngIf="form.controls.unidad_nro.touched && form.controls.unidad_nro.invalid">Ingresa al menos 2 caracteres.</small></label>
+      <label><span>Tipo *</span><input pInputText formControlName="tipo" placeholder="Volqueta" /><small *ngIf="form.controls.tipo.touched && form.controls.tipo.invalid">Ingresa al menos 2 caracteres.</small></label>
+      <label><span>Placa o serie</span><input pInputText formControlName="placa_serie" placeholder="ABC-123" /></label>
+      <label><span>Marca</span><input pInputText formControlName="marca" placeholder="Volvo" /></label>
+      <label><span>Modelo</span><input pInputText formControlName="modelo" placeholder="FH16" /></label>
+      <label>
+        <span>Trabajador designado</span>
+        <select formControlName="conductor_id">
+          <option [value]="null">Sin asignar</option>
+          <option *ngFor="let usuario of usuarios" [value]="usuario.id">
+            {{ usuario.nombre }} {{ usuario.apellido || '' }}
+          </option>
+        </select>
+      </label>
+      <label *ngIf="editing"><span>Horas de uso</span><input pInputText formControlName="uso_total_horas" placeholder="1500 hours" /></label>
+      
+      <div class="wide-field upload-field">
+        <span>Imagen del vehículo</span>
+        <div class="upload-zone" [class.has-preview]="form.value.foto_url">
+          <input type="file" id="fileUpload" accept="image/*" (change)="onFileSelected($event)" style="display: none;" #fileInput />
+          
+          <div *ngIf="!form.value.foto_url" class="upload-placeholder" (click)="fileInput.click()">
+            <i class="pi pi-cloud-upload upload-icon"></i>
+            <span>Arrastra una imagen o <strong>haz clic aquí</strong> para buscar</span>
+            <small>Formatos permitidos: JPG, PNG. Tamaño máximo aconsejable 2MB.</small>
+          </div>
+          
+          <div *ngIf="form.value.foto_url" class="upload-preview-container">
+            <img [src]="form.value.foto_url" alt="Vista previa del vehículo" class="upload-preview" />
+            <div class="upload-preview-overlay">
+              <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-rounded" label="Eliminar foto" (click)="clearFoto()"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <label class="active-check"><p-checkbox formControlName="activo" [binary]="true" inputId="activo"></p-checkbox><span>Vehículo activo y disponible</span></label>
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="dialogVisible = false"></button>
+      <button pButton type="submit" icon="pi pi-save" [label]="editing ? 'Guardar cambios' : 'Registrar vehículo'" [loading]="saving"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

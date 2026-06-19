@@ -1,0 +1,23 @@
+<main class="module-page">
+  <header><div><span>Control técnico</span><h1>Mantenimientos</h1><p>Registra servicios y consulta el historial relacionado con cada vehículo.</p></div><button pButton icon="pi pi-plus" label="Registrar mantenimiento" (click)="open()"></button></header>
+  <section class="card">
+    <div class="filters"><label><span>Vehículo</span><select [(ngModel)]="filterVehicle"><option value="">Todos</option><option *ngFor="let v of vehiculos" [value]="v.id">{{v.unidad_nro}} - {{v.tipo}}</option></select></label><button pButton icon="pi pi-filter" label="Filtrar" (click)="page=1;load()"></button></div>
+    <p-table [value]="mantenimientos" [loading]="loading" responsiveLayout="scroll">
+      <ng-template pTemplate="header"><tr><th>Imagen</th><th>Vehículo</th><th>Servicio</th><th>Fecha</th><th>Horómetro</th><th>Costo</th><th>Acciones</th></tr></ng-template>
+      <ng-template pTemplate="body" let-m><tr>
+        <td><img *ngIf="m.foto_factura_url; else maintenanceIcon" [src]="m.foto_factura_url" alt="Imagen de mantenimiento"><ng-template #maintenanceIcon><span class="image-placeholder"><i class="pi pi-wrench"></i></span></ng-template></td>
+        <td><strong>{{m.vehiculo?.unidad_nro || m.vehiculo_id}}</strong><small>{{m.vehiculo?.marca}} {{m.vehiculo?.modelo}}</small></td><td>{{m.tipo_servicio}}</td><td>{{m.fecha_servicio}}</td><td>{{m.horometro_servicio || 0}}</td><td>{{m.costo_total | currency:'BOB':'Bs '}}</td>
+        <td><button pButton icon="pi pi-pencil" [text]="true" [rounded]="true" (click)="open(m)"></button><button pButton icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (click)="remove(m)"></button></td>
+      </tr></ng-template><ng-template pTemplate="emptymessage"><tr><td colspan="7" class="empty">No hay mantenimientos registrados.</td></tr></ng-template>
+    </p-table><p-paginator [first]="(page-1)*limit" [rows]="limit" [totalRecords]="total" [rowsPerPageOptions]="[5,10,20]" (onPageChange)="paginate($event)"></p-paginator>
+  </section>
+</main>
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{width:'min(680px,94vw)'}" [header]="editing?'Editar mantenimiento':'Registrar mantenimiento'">
+  <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+    <label><span>Vehículo *</span><select formControlName="vehiculo_id"><option [ngValue]="0">Seleccione</option><option *ngFor="let v of vehiculos" [ngValue]="v.id">{{v.unidad_nro}} - {{v.tipo}}</option></select></label>
+    <label><span>Fecha *</span><input pInputText type="date" formControlName="fecha_servicio"></label><label><span>Tipo de servicio *</span><input pInputText formControlName="tipo_servicio" placeholder="Cambio de aceite"></label>
+    <label><span>Horómetro *</span><input pInputText type="number" formControlName="horometro_servicio"></label><label><span>Próximo mantenimiento</span><input pInputText type="number" formControlName="proximo_mantenimiento_h"></label><label><span>Costo total *</span><input pInputText type="number" formControlName="costo_total"></label>
+    <label class="wide"><span>URL de imagen o factura</span><input pInputText formControlName="foto_factura_url" placeholder="https://.../factura.jpg"></label><label class="wide"><span>Observaciones</span><input pInputText formControlName="observaciones"></label>
+    <div class="actions"><button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="visible=false"></button><button pButton type="submit" icon="pi pi-save" label="Guardar" [loading]="saving"></button></div>
+  </form>
+</p-dialog><p-confirmDialog></p-confirmDialog>

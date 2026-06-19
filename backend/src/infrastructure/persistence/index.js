@@ -58,12 +58,16 @@ Usuario.belongsTo(Role, { foreignKey: 'rol_id', as: 'role' });
 Usuario.hasMany(Empresa, { foreignKey: 'creado_por_id', as: 'empresas_creadas' });
 Empresa.belongsTo(Usuario, { foreignKey: 'creado_por_id', as: 'creado_por' });
 
+
 Usuario.hasMany(Jornada, { foreignKey: 'usuario_id', as: 'jornadas' });
 Jornada.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
 
 Vehiculo.hasMany(Jornada, { foreignKey: 'vehiculo_id', as: 'jornadas' });
 Jornada.hasOne(ChecklistDiario, { foreignKey: 'jornada_id', as: 'checklist' });
 Jornada.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id', as: 'vehiculo' });
+
+Usuario.hasMany(Vehiculo, { foreignKey: 'conductor_id', as: 'vehiculos_asignados' });
+Vehiculo.belongsTo(Usuario, { foreignKey: 'conductor_id', as: 'conductor' });
 
 ChecklistDiario.belongsTo(Jornada, { foreignKey: 'jornada_id', as: 'jornada' });
 
@@ -95,6 +99,19 @@ AlertaMantenimiento.belongsTo(Usuario, { foreignKey: 'resuelta_por_id', as: 'res
 // Token Blacklist associations
 Usuario.hasMany(TokenBlacklist, { foreignKey: 'usuario_id', as: 'tokens_revocados' });
 TokenBlacklist.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
+
+// Run schema migrations for database changes
+(async () => {
+  try {
+    await sequelize.query(`
+      ALTER TABLE vehiculos ALTER COLUMN foto_url TYPE TEXT;
+      ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS conductor_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL;
+    `);
+    console.log('✓ Database schema updated successfully (foto_url to TEXT, conductor_id added)');
+  } catch (err) {
+    console.error('Error updating database schema:', err.message);
+  }
+})();
 
 module.exports = {
   sequelize,

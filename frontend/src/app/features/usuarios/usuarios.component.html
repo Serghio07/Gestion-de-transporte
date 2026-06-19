@@ -1,0 +1,27 @@
+<main class="module-page">
+  <header><div><span>Administración</span><h1>Usuarios</h1><p>Gestiona las personas que acceden a la empresa.</p></div><button pButton icon="pi pi-user-plus" label="Registrar usuario" (click)="open()"></button></header>
+  <section class="card">
+    <p-table [value]="usuarios" [loading]="loading" responsiveLayout="scroll">
+      <ng-template pTemplate="header"><tr><th>Usuario</th><th>Teléfono</th><th>Rol</th><th>Empresa</th><th>Estado</th><th>Acciones</th></tr></ng-template>
+      <ng-template pTemplate="body" let-u><tr>
+        <td><div class="person"><img *ngIf="u.foto_url; else avatar" [src]="u.foto_url" alt="Foto de usuario"><ng-template #avatar><span class="avatar"><i class="pi pi-user"></i></span></ng-template><span><strong>{{u.nombre}} {{u.apellido || ''}}</strong><small>{{u.email || 'Sin correo'}}</small></span></div></td>
+        <td>{{u.telefono}}</td><td>{{u.role?.nombre || roleName(u.rol_id)}}</td><td>{{u.empresa?.nombre || 'Sin empresa'}}</td>
+        <td><p-tag [value]="u.activo ? 'Activo' : 'Inactivo'" [severity]="u.activo ? 'success' : 'secondary'"></p-tag></td>
+        <td><button pButton icon="pi pi-pencil" [text]="true" [rounded]="true" (click)="open(u)"></button><button pButton icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (click)="remove(u)"></button></td>
+      </tr></ng-template>
+      <ng-template pTemplate="emptymessage"><tr><td colspan="6" class="empty">No hay usuarios registrados.</td></tr></ng-template>
+    </p-table>
+    <p-paginator [first]="(page-1)*limit" [rows]="limit" [totalRecords]="total" [rowsPerPageOptions]="[5,10,20]" (onPageChange)="paginate($event)"></p-paginator>
+  </section>
+</main>
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{width:'min(650px,94vw)'}" [header]="editing ? 'Editar usuario' : 'Registrar usuario'">
+  <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+    <label><span>Nombre *</span><input pInputText formControlName="nombre"></label><label><span>Apellido</span><input pInputText formControlName="apellido"></label>
+    <label><span>Teléfono *</span><input pInputText formControlName="telefono"></label><label><span>Correo</span><input pInputText formControlName="email"></label>
+    <label><span>Rol *</span><select formControlName="rol_id"><option [ngValue]="1">Administrador</option><option [ngValue]="2">Trabajador</option><option [ngValue]="3">Supervisor</option></select></label>
+    <label><span>{{editing ? 'Nueva contraseña (opcional)' : 'Contraseña *'}}</span><input pInputText type="password" formControlName="password"></label>
+    <label class="wide"><span>URL de imagen</span><input pInputText formControlName="foto_url" placeholder="https://.../usuario.jpg"></label>
+    <label class="check"><p-checkbox formControlName="activo" [binary]="true"></p-checkbox><span>Usuario activo</span></label>
+    <div class="actions"><button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="visible=false"></button><button pButton type="submit" icon="pi pi-save" label="Guardar" [loading]="saving"></button></div>
+  </form>
+</p-dialog><p-confirmDialog></p-confirmDialog>

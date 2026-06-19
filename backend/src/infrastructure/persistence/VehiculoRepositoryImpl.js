@@ -36,6 +36,7 @@ class VehiculoRepositoryImpl extends VehiculoRepository {
     if (filters.tipo) where.tipo = filters.tipo;
     if (filters.unidad_nro) where.unidad_nro = { [this.db.Sequelize.Op.iLike]: `%${filters.unidad_nro}%` };
     if (filters.activo !== undefined) where.activo = filters.activo === true || filters.activo === 'true';
+    if (filters.empresa_id) where.empresa_id = filters.empresa_id;
 
     const { count, rows } = await this.db.models.Vehiculo.findAndCountAll({
       where,

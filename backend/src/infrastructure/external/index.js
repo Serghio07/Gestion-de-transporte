@@ -57,6 +57,7 @@ class AuthService {
       id: usuario.id,
       telefono: usuario.telefono,
       rol_id: usuario.rol_id,
+      empresa_id: usuario.empresa_id || null,
       type: 'access'
     };
     const refreshPayload = {

@@ -1,6 +1,7 @@
 // Interfaces - Vehiculo Controller
 
 const { CreateVehiculoDTO, UpdateVehiculoDTO } = require('../../../application/dtos/vehiculo.dto.js');
+const { Usuario } = require('../../../infrastructure/persistence');
 
 class VehiculoController {
   constructor(diContainer) {
@@ -9,7 +10,11 @@ class VehiculoController {
 
   async create(req, res, next) {
     try {
-      const createVehiculoDTO = CreateVehiculoDTO.fromRequest(req.body);
+      const usuario = await Usuario.findByPk(req.user.id);
+      const createVehiculoDTO = CreateVehiculoDTO.fromRequest({
+        ...req.body,
+        empresa_id: usuario?.empresa_id || null
+      });
       const useCase = this.diContainer.get('CreateVehiculoUseCase');
       const vehiculo = await useCase.execute(createVehiculoDTO);
 
@@ -27,6 +32,8 @@ class VehiculoController {
     try {
       const { page = 1, limit = 10, tipo, activo, unidad_nro } = req.query;
       const filters = {};
+      const usuario = await Usuario.findByPk(req.user.id);
+      if (usuario?.empresa_id) filters.empresa_id = usuario.empresa_id;
       if (tipo) filters.tipo = tipo;
       if (activo !== undefined) filters.activo = activo === 'true' || activo === true;
       if (unidad_nro) filters.unidad_nro = unidad_nro;

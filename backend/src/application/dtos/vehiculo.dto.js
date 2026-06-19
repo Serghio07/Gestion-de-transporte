@@ -3,13 +3,16 @@
 const { ValidationException } = require('../../domain/exceptions');
 
 class CreateVehiculoDTO {
-  constructor(unidad_nro, tipo, placa_serie, marca, modelo, activo) {
+  constructor(unidad_nro, tipo, placa_serie, marca, modelo, activo, foto_url, empresa_id, conductor_id) {
     this.unidad_nro = unidad_nro?.trim();
     this.tipo = tipo?.trim()?.toLowerCase();
     this.placa_serie = placa_serie?.trim()?.toUpperCase() || null;
     this.marca = marca?.trim() || null;
     this.modelo = modelo?.trim() || null;
     this.activo = activo === undefined ? true : Boolean(activo);
+    this.foto_url = foto_url?.trim() || null;
+    this.empresa_id = empresa_id ? parseInt(empresa_id) : null;
+    this.conductor_id = conductor_id ? parseInt(conductor_id) : null;
   }
 
   validate() {
@@ -37,7 +40,10 @@ class CreateVehiculoDTO {
       body.placa_serie,
       body.marca,
       body.modelo,
-      body.activo
+      body.activo,
+      body.foto_url,
+      body.empresa_id,
+      body.conductor_id
     );
     const errors = dto.validate();
     if (errors) {
@@ -48,7 +54,7 @@ class CreateVehiculoDTO {
 }
 
 class UpdateVehiculoDTO {
-  constructor(unidad_nro, tipo, placa_serie, marca, modelo, activo, uso_total_horas) {
+  constructor(unidad_nro, tipo, placa_serie, marca, modelo, activo, uso_total_horas, foto_url, conductor_id) {
     this.unidad_nro = unidad_nro ? unidad_nro.trim() : null;
     this.tipo = tipo ? tipo.trim().toLowerCase() : null;
     this.placa_serie = placa_serie ? placa_serie.trim().toUpperCase() : null;
@@ -56,6 +62,8 @@ class UpdateVehiculoDTO {
     this.modelo = modelo ? modelo.trim() : null;
     this.activo = activo === undefined || activo === null ? null : Boolean(activo);
     this.uso_total_horas = uso_total_horas || null;
+    this.foto_url = foto_url ? foto_url.trim() : null;
+    this.conductor_id = conductor_id ? parseInt(conductor_id) : null;
   }
 
   validate() {
@@ -96,7 +104,9 @@ class UpdateVehiculoDTO {
       body.marca,
       body.modelo,
       body.activo,
-      body.uso_total_horas
+      body.uso_total_horas,
+      body.foto_url,
+      body.conductor_id
     );
     const errors = dto.validate();
     if (errors) {

@@ -3,6 +3,11 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   return sequelize.define('Vehiculo', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    empresa_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: 'empresas', key: 'id' }
+    },
     unidad_nro: { type: DataTypes.STRING(50), allowNull: false, unique: true },
     tipo: { type: DataTypes.STRING(50), allowNull: false },
     placa_serie: { type: DataTypes.STRING(50), allowNull: true, unique: true },
@@ -10,6 +15,12 @@ module.exports = (sequelize) => {
     modelo: { type: DataTypes.STRING(100), allowNull: true },
     anio: { type: DataTypes.SMALLINT, allowNull: true },
     color: { type: DataTypes.STRING(50), allowNull: true },
+    foto_url: { type: DataTypes.TEXT, allowNull: true },
+    conductor_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: 'usuarios', key: 'id' }
+    },
     uso_total_horas: { type: DataTypes.STRING, allowNull: false, defaultValue: '0 hours' },
     activo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
   }, {

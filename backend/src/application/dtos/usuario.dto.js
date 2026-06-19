@@ -3,7 +3,8 @@
 const { ValidationException } = require('../../domain/exceptions');
 
 function normalizePhone(value) {
-  return String(value || '').trim().replace(/[^\d+]/g, '') || null;
+  const digits = String(value || '').replace(/\D/g, '');
+  return (digits.startsWith('591') && digits.length > 8 ? digits.slice(3) : digits) || null;
 }
 
 class CreateUsuarioDTO {

@@ -31,9 +31,12 @@ class CreateUsuarioUseCase {
       email: createUsuarioDTO.email || null,
       telefono: createUsuarioDTO.telefono,
       empresa_id: createUsuarioDTO.empresa_id || null,
+      empresa_transporte: createUsuarioDTO.empresa_transporte || null,
+      foto_url: createUsuarioDTO.foto_url || null,
       password_hash: hashedPassword,
       rol_id: createUsuarioDTO.rol_id,
-      activo: createUsuarioDTO.estado ? createUsuarioDTO.estado === 'activo' : true
+      activo: createUsuarioDTO.estado ? createUsuarioDTO.estado === 'activo' : true,
+      telefono_verificado_en: new Date()
     };
 
     const usuario = await this.usuarioRepository.create(usuarioData);

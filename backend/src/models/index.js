@@ -31,6 +31,8 @@ const TelefonoVerificacion = require('./TelefonoVerificacion')(sequelize);
 // Definir relaciones
 Empresa.hasMany(Usuario, { foreignKey: 'empresa_id', as: 'usuarios' });
 Usuario.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Empresa.hasMany(Vehiculo, { foreignKey: 'empresa_id', as: 'vehiculos' });
+Vehiculo.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
 
 Role.hasMany(Usuario, { foreignKey: 'rol_id', as: 'usuarios' });
 Usuario.belongsTo(Role, { foreignKey: 'rol_id', as: 'role' });

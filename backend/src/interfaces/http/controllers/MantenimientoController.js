@@ -1,6 +1,7 @@
 // Interfaces - Mantenimiento Controller
 
 const { CreateMantenimientoDTO, UpdateMantenimientoDTO } = require('../../../application/dtos/mantenimiento.dto.js');
+const { Usuario } = require('../../../infrastructure/persistence');
 
 class MantenimientoController {
   constructor(diContainer) {
@@ -27,6 +28,8 @@ class MantenimientoController {
     try {
       const { page = 1, limit = 10, vehiculo_id, tipo_servicio, tipo_mantenimiento } = req.query;
       const filters = {};
+      const usuario = await Usuario.findByPk(req.user.id);
+      if (usuario?.empresa_id) filters.empresa_id = usuario.empresa_id;
       if (vehiculo_id) filters.vehiculo_id = parseInt(vehiculo_id);
       if (tipo_servicio) filters.tipo_servicio = tipo_servicio;
       if (tipo_mantenimiento) filters.tipo_mantenimiento = tipo_mantenimiento;

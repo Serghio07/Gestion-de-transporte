@@ -82,14 +82,14 @@ export class LoginComponent {
       },
       error: (error) => {
         this.loading = false;
-        if (error?.error?.error?.code === 'PHONE_NOT_VERIFIED') {
+        if (this.errorCode(error) === 'PHONE_NOT_VERIFIED') {
           this.pendingPhone = telefono.trim();
           this.activeTab = 'verify';
         }
         this.messageService.add({
           severity: 'error',
           summary: 'No se pudo iniciar sesion',
-          detail: error?.error?.error?.message || 'Revisa el telefono y la contrasena'
+          detail: this.errorMessage(error, 'Revisa el telefono y la contrasena')
         });
       }
     });
@@ -129,7 +129,7 @@ export class LoginComponent {
         this.messageService.add({
           severity: 'error',
           summary: 'No se pudo registrar',
-          detail: error?.error?.error?.message || 'Revisa el numero de telefono'
+          detail: this.errorMessage(error, 'Revisa el numero de telefono')
         });
       }
     });
@@ -160,7 +160,7 @@ export class LoginComponent {
         this.messageService.add({
           severity: 'error',
           summary: 'Codigo invalido',
-          detail: error?.error?.error?.message || 'Solicita un nuevo codigo si expiro'
+          detail: this.errorMessage(error, 'Solicita un nuevo codigo si expiro')
         });
       }
     });
@@ -185,7 +185,7 @@ export class LoginComponent {
         this.messageService.add({
           severity: 'error',
           summary: 'No se pudo reenviar',
-          detail: error?.error?.error?.message || 'Intenta nuevamente'
+          detail: this.errorMessage(error, 'Intenta nuevamente')
         });
       }
     });
@@ -214,5 +214,15 @@ export class LoginComponent {
 
   private redirectByRole(role: number): void {
     this.router.navigate([role === 1 ? '/admin' : '/dashboard']);
+  }
+
+  private errorCode(error: any): string | null {
+    return error?.error?.error?.code || error?.error?.code || null;
+  }
+
+  private errorMessage(error: any, fallback: string): string {
+    const value = error?.error?.error;
+    if (typeof value === 'string') return value;
+    return value?.message || error?.error?.message || fallback;
   }
 }

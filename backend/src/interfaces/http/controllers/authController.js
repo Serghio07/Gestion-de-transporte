@@ -1,13 +1,14 @@
 const UAParser = require('ua-parser-js');
 const { randomInt, randomUUID } = require('crypto');
-const { sequelize, Session, TelefonoVerificacion, Usuario } = require('../../../infrastructure/persistence');
+const { sequelize, Empresa, Session, TelefonoVerificacion, Usuario } = require('../../../infrastructure/persistence');
 
 function getContainer() {
   return require('../../../container');
 }
 
 function normalizePhone(value) {
-  return String(value || '').trim().replace(/[^\d+]/g, '');
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits.startsWith('591') && digits.length > 8 ? digits.slice(3) : digits;
 }
 
 class AuthController {
@@ -203,10 +204,16 @@ class AuthController {
 
       const authService = getContainer().get('authService');
       const hashedPassword = await authService.hashPassword(password);
+      const [empresa] = await Empresa.findOrCreate({
+        where: { nombre: empresaTransporte },
+        defaults: { nombre: empresaTransporte },
+        transaction
+      });
       const usuario = await Usuario.create({
         nombre,
         apellido,
         empresa_transporte: empresaTransporte,
+        empresa_id: empresa.id,
         email: null,
         telefono,
         password_hash: hashedPassword,
@@ -394,7 +401,10 @@ class AuthController {
       }
 
       const authService = getContainer().get('authService');
-      const usuario = await Usuario.findOne({ where: { telefono } });
+      const usuario = await Usuario.findOne({
+        where: { telefono },
+        include: [{ model: Empresa, as: 'empresa', attributes: ['id', 'nombre'] }]
+      });
 
       if (!usuario) {
         return res.status(401).json({
@@ -419,6 +429,14 @@ class AuthController {
           error: 'Debes confirmar tu telefono antes de iniciar sesion',
           code: 'PHONE_NOT_VERIFIED'
         });
+      }
+
+      if (!usuario.empresa_id && usuario.empresa_transporte) {
+        const [empresa] = await Empresa.findOrCreate({
+          where: { nombre: usuario.empresa_transporte },
+          defaults: { nombre: usuario.empresa_transporte }
+        });
+        await usuario.update({ empresa_id: empresa.id });
       }
 
       const sessionId = randomUUID();
@@ -458,6 +476,8 @@ class AuthController {
             id: usuario.id,
             name: usuario.nombre,
             telefono: usuario.telefono,
+            empresa: usuario.empresa?.nombre || usuario.empresa_transporte || 'Sin empresa asignada',
+            foto_url: usuario.foto_url || null,
             role: usuario.rol_id,
             permissions: usuario.permissions || []
           },
@@ -604,6 +624,38 @@ class AuthController {
         success: true,
         data: sesiones,
         timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async me(req, res, next) {
+    try {
+      const usuario = await Usuario.findByPk(req.user.id, {
+        include: [{ model: Empresa, as: 'empresa', attributes: ['id', 'nombre'] }]
+      });
+      if (!usuario) return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+
+      if (!usuario.empresa_id && usuario.empresa_transporte) {
+        const [empresa] = await Empresa.findOrCreate({
+          where: { nombre: usuario.empresa_transporte },
+          defaults: { nombre: usuario.empresa_transporte }
+        });
+        await usuario.update({ empresa_id: empresa.id });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          id: usuario.id,
+          name: usuario.nombre,
+          telefono: usuario.telefono,
+          empresa: usuario.empresa?.nombre || usuario.empresa_transporte || 'Sin empresa asignada',
+          foto_url: usuario.foto_url || null,
+          role: usuario.rol_id,
+          permissions: usuario.permissions || []
+        }
       });
     } catch (error) {
       next(error);

@@ -1,0 +1,12 @@
+BEGIN;
+
+ALTER TABLE usuarios
+  ADD COLUMN IF NOT EXISTS foto_url VARCHAR(500);
+
+ALTER TABLE vehiculos
+  ADD COLUMN IF NOT EXISTS empresa_id INTEGER REFERENCES empresas(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS foto_url VARCHAR(500);
+
+CREATE INDEX IF NOT EXISTS idx_vehiculos_empresa_id ON vehiculos(empresa_id);
+
+COMMIT;

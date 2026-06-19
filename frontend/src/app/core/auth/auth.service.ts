@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 
 import { AuthUser, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, SessionInfo, VerifyPhoneRequest } from './auth.models';
 
@@ -53,6 +53,29 @@ export class AuthService {
 
   getAccessToken(): string | null {
     return this.tokenSignal();
+  }
+
+  refreshAccessToken(): Observable<string> {
+    return this.http.post<{ success: boolean; data: { accessToken: string; expiresIn: number } }>(
+      '/api/auth/refresh',
+      {},
+      { withCredentials: true }
+    ).pipe(
+      map((response) => response.data.accessToken),
+      tap((accessToken) => {
+        localStorage.setItem(TOKEN_KEY, accessToken);
+        this.tokenSignal.set(accessToken);
+      })
+    );
+  }
+
+  refreshProfile(): void {
+    this.http.get<{ success: boolean; data: AuthUser }>('/api/auth/me').subscribe({
+      next: (response) => {
+        localStorage.setItem(USER_KEY, JSON.stringify(response.data));
+        this.userSignal.set(response.data);
+      }
+    });
   }
 
   clearSession(): void {

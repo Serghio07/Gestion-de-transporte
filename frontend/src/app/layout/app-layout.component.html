@@ -1,0 +1,33 @@
+<div class="app-shell" [class.sidebar-open]="sidebarOpen">
+  <aside class="sidebar">
+    <a routerLink="/dashboard" class="brand" (click)="closeSidebar()">
+      <span class="brand-mark"><i class="pi pi-truck"></i></span>
+      <span><strong>TranspoSystem</strong><small>Gestión de transporte</small></span>
+    </a>
+    <nav class="nav-menu" aria-label="Menú principal">
+      <span class="nav-label">Principal</span>
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeSidebar()"><i class="pi pi-home"></i><span>Dashboard</span></a>
+      <a routerLink="/vehiculos" routerLinkActive="active" (click)="closeSidebar()"><i class="pi pi-truck"></i><span>Vehículos</span></a>
+      <a routerLink="/usuarios" routerLinkActive="active" (click)="closeSidebar()"><i class="pi pi-users"></i><span>Usuarios</span></a>
+      <a routerLink="/mantenimientos" routerLinkActive="active" (click)="closeSidebar()"><i class="pi pi-wrench"></i><span>Mantenimientos</span></a>
+      <span class="nav-label">Próximos módulos</span>
+      <span class="nav-disabled"><i class="pi pi-calendar"></i><span>Jornadas</span></span>
+      <span class="nav-disabled"><i class="pi pi-chart-bar"></i><span>Reportes</span></span>
+    </nav>
+    <div class="sidebar-footer"><span class="company-icon"><i class="pi pi-building"></i></span><span><small>Empresa</small><strong>{{ auth.user()?.empresa || 'Sin empresa asignada' }}</strong></span></div>
+  </aside>
+  <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+  <section class="workspace">
+    <header class="app-header">
+      <button pButton type="button" icon="pi pi-bars" [text]="true" [rounded]="true" class="menu-toggle" aria-label="Abrir menú" (click)="sidebarOpen = !sidebarOpen"></button>
+      <div class="header-title"><strong>{{ auth.user()?.empresa || 'TranspoSystem' }}</strong><small>Panel administrativo</small></div>
+      <div class="user-area">
+        <img *ngIf="auth.user()?.foto_url; else initialsAvatar" class="avatar avatar-image" [src]="auth.user()?.foto_url" alt="Foto de usuario" />
+        <ng-template #initialsAvatar><span class="avatar">{{ initials() }}</span></ng-template>
+        <span class="user-copy"><strong>{{ auth.user()?.name }}</strong><small>{{ auth.user()?.telefono }}</small></span>
+        <button pButton type="button" icon="pi pi-sign-out" severity="secondary" [text]="true" [rounded]="true" aria-label="Cerrar sesión" (click)="auth.logout()"></button>
+      </div>
+    </header>
+    <div class="page-content"><router-outlet></router-outlet></div>
+  </section>
+</div>

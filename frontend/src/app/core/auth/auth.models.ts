@@ -20,6 +20,8 @@ export interface AuthUser {
   id: number;
   name: string;
   telefono: string;
+  empresa: string;
+  foto_url: string | null;
   role: number;
   permissions: string[];
 }
